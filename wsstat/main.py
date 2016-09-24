@@ -190,7 +190,4 @@ def run():
     urwid_loop.run()
 
     client.loop.close()
-
-
-if __name__ == "__main__":
-    run()
+    
