@@ -1,21 +1,18 @@
 #!/usr/bin/env python
+import argparse
 import asyncio
-
+import hashlib
 import itertools
+import logging
+import os
+import time
 import urllib.parse
 from collections import OrderedDict, deque
 
-import time
-import argparse
 import websockets
-import os
-import hashlib
-
 from websockets.protocol import OPEN
 
-from gui import build_urwid_loop, Logger, BlinkBoard
-
-import logging
+from wsstat.gui import build_urwid_loop, Logger, BlinkBoard
 
 logging.basicConfig(level=logging.FATAL)
 
@@ -163,7 +160,6 @@ class WebsocketTestingClient(object):
         return True
 
     def unhandled_input(self, input):
-        print(input)
         return True
 
     def _get_current_messages_per_second(self):

@@ -70,22 +70,25 @@ class Logger(object):
 
     timelogger = collections.deque(maxlen=30)
 
+    graph_title = " Messages / Second | 3 Second window "
+
     def __init__(self):
         self.walker = urwid.SimpleFocusListWalker(contents=self.log_messages)
         self.list_box = urwid.ListBox(self.walker)
 
+
+
         satt = {(1, 0): 'bg 1 smooth', (2, 0): 'bg 2 smooth'}
         self.graph = urwid.BarGraph(['bg background','bg 1','bg 2'], satt=satt)
+
+        self.graph_box = urwid.LineBox(self.graph, title=self.graph_title)
 
         self.widget = urwid.Columns([
             urwid.LineBox(
                 self.list_box,
                 title="Logger"
             ),
-            urwid.LineBox(
-                self.graph,
-                title="Messages / Second"
-            ),
+            self.graph_box
         ])
 
     def log(self, string):
@@ -98,8 +101,9 @@ class Logger(object):
         top = max([x[0] for x in graph_data])
         if top > 0:
             self.graph.set_data(graph_data, top)
-
-
+            self.graph_box.title_widget.set_text(self.graph_title + "| Y-Max:{} ".format(top))
+        else:
+            self.graph_box.title_widget.set_text(self.graph_title)
 
 palette = [
     ('banner', LIGHT_GREEN, DEFAULT),
