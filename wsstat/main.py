@@ -190,4 +190,3 @@ def run():
     urwid_loop.run()
 
     client.loop.close()
-    
