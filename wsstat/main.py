@@ -180,11 +180,18 @@ parser.add_argument("-n", "--num-clients", help="Number of clients to connect - 
 parser.add_argument("-c", "--max-connects", help="Number of connections to simultaniously open - default 15", action="store", default="15", type=int)
 args = parser.parse_args()
 
-client = WebsocketTestingClient(args.websocket_url, total_connections=args.num_clients, max_connecting_sockets=args.max_connects)
 
-# Get the urwid loop
-urwid_loop = build_urwid_loop(client)
+def run():
+    client = WebsocketTestingClient(args.websocket_url, total_connections=args.num_clients,
+                                    max_connecting_sockets=args.max_connects)
 
-urwid_loop.run()
+    # Get the urwid loop
+    urwid_loop = build_urwid_loop(client)
 
-client.loop.close()
+    urwid_loop.run()
+
+    client.loop.close()
+
+
+if __name__ == "__main__":
+    run()
