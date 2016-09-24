@@ -1,7 +1,5 @@
-from __future__ import print_function
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
-import io
 import os
 import sys
 
@@ -17,16 +15,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open('requirements.txt') as f:
     dependencies = f.read().splitlines()
 
-def read(*filenames, **kwargs):
-    encoding = kwargs.get('encoding', 'utf-8')
-    sep = kwargs.get('sep', '\n')
-    buf = []
-    for filename in filenames:
-        with io.open(filename, encoding=encoding) as f:
-            buf.append(f.read())
-    return sep.join(buf)
-
-long_description = read('README.md')
+with open("README.md") as f:
+    long_description = f.read()
 
 class PyTest(TestCommand):
     def finalize_options(self):

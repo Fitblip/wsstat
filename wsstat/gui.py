@@ -12,11 +12,11 @@ def get_ws_status(websocket, connected, error):
     if websocket.ws.state == OPEN:
         out = time.time() - websocket.last_message_recv
         if out < 0.3:
-            return ('connected_highlight', connected)
+            return 'connected_highlight', connected
         else:
-            return ('connected', connected)
+            return 'connected', connected
     elif websocket.ws.state in (CLOSING, CLOSED):
-        return ('error', error)
+        return 'error', error
 
 class BlinkBoard(object):
     def __init__(self):
@@ -79,7 +79,7 @@ class Logger(object):
 
 
         satt = {(1, 0): 'bg 1 smooth', (2, 0): 'bg 2 smooth'}
-        self.graph = urwid.BarGraph(['bg background','bg 1','bg 2'], satt=satt)
+        self.graph = urwid.BarGraph(['bg background', 'bg 1', 'bg 2'], satt=satt)
 
         self.graph_box = urwid.LineBox(self.graph, title=self.graph_title)
 
@@ -138,14 +138,12 @@ class DummyScreen(urwid.raw_display.Screen):
 screen = urwid.raw_display.Screen()
 
 def build_urwid_loop(client):
-    pile = urwid.Pile(client.widgets)
     frame = urwid.Frame(
-        pile
-        ,
+        urwid.Pile(client.widgets),
         footer=urwid.Text("", align='center'),
     )
 
-    client.pile = pile
+    client.frame = frame
 
     return urwid.MainLoop(
         frame,

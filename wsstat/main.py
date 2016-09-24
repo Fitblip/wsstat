@@ -38,7 +38,7 @@ class ConnectedWebsocketConnection(object):
 class WebsocketTestingClient(object):
     def __init__(self, websocket_url, total_connections, max_connecting_sockets=5):
         # Configuration stuff
-        self.screen = None
+        self.frame = None
         self.websocket_url = urllib.parse.urlparse(websocket_url)
         self.total_connections = total_connections
 
@@ -64,17 +64,18 @@ class WebsocketTestingClient(object):
     def messages_per_second(self):
         return self._get_current_messages_per_second()
 
-    async def create_websocket_connection(self):
+    @asyncio.coroutine
+    def create_websocket_connection(self):
         # Generate a random API token
         api_token = hashlib.sha256(os.urandom(4)).hexdigest()
 
         # Make len(connection_semaphore) connection attempts at a time
-        with await self.connection_semaphore:
+        with (yield from self.connection_semaphore):
             # Signify that this socket is connecting
             self.sockets[api_token[:8]] = None
 
             # Await the connection to complete successfully
-            websocket = await websockets.connect(self.websocket_url.geturl(), extra_headers={"x-endpoint-token": api_token})
+            websocket = yield from websockets.connect(self.websocket_url.geturl(), extra_headers={"x-endpoint-token": api_token})
 
             # Create our handler object
             connected_websocket = ConnectedWebsocketConnection(websocket, api_token)
@@ -93,7 +94,7 @@ class WebsocketTestingClient(object):
                 #     await websocket.send("DERP")
 
                 # Wait for a new message
-                await websocket.recv()
+                yield from websocket.recv()
 
                 # Test random disconnects
                 # import random
@@ -111,13 +112,14 @@ class WebsocketTestingClient(object):
             # Log the exception
             self.logger.log("[{}] {}".format(connected_websocket.id, e))
 
-    async def update_urwid(self):
-        INTERVAL = .1
-        STATUS_LINE = "{hostname} | Connections: [{current}/{total}] | Total Messages: {message_count} | Messages/Second: {msgs_per_second}/s"
+    @asyncio.coroutine
+    def update_urwid(self):
+        interval = .1
+        status_line = "{hostname} | Connections: [{current}/{total}] | Total Messages: {message_count} | Messages/Second: {msgs_per_second}/s"
 
         while True:
             # Only update things a max of 10 times/second
-            await asyncio.sleep(INTERVAL)
+            yield from asyncio.sleep(interval)
 
             # Get the current global message count
             global_message_count = int(repr(self.global_message_counter)[6:-1])
@@ -130,15 +132,14 @@ class WebsocketTestingClient(object):
             # Get and update our blinkboard widget
             self.blinkboard.generate_blinkers(self.sockets)
             # Make the status message
-            status_message = STATUS_LINE.format(
+            status_message = status_line.format(
                 hostname=self.websocket_url.netloc,
                 current=currently_connected_sockets,
                 total=self.total_connections,
                 message_count=global_message_count,
                 msgs_per_second=self.messages_per_second
             )
-
-            urwid_loop.widget.footer.set_text(status_message)
+            self.frame.footer.set_text(status_message)
 
     def setup_tasks(self):
         coroutines = []
@@ -159,7 +160,9 @@ class WebsocketTestingClient(object):
         self.loop.stop()
         return True
 
-    def unhandled_input(self, input):
+    def unhandled_input(self, keypress):
+        if keypress == "q":
+            self.exit()
         return True
 
     def _get_current_messages_per_second(self):
@@ -174,19 +177,27 @@ class WebsocketTestingClient(object):
 
         return msgs_per_second
 
-parser = argparse.ArgumentParser()
-parser.add_argument("websocket_url", help="The websocket URL to hit")
-parser.add_argument("-n", "--num-clients", help="Number of clients to connect - default 250", action="store", default="250", type=int)
-parser.add_argument("-c", "--max-connects", help="Number of connections to simultaniously open - default 15", action="store", default="15", type=int)
-args = parser.parse_args()
-
-client = WebsocketTestingClient(args.websocket_url, total_connections=args.num_clients,
-                                max_connecting_sockets=args.max_connects)
 
 def run():
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("websocket_url", help="The websocket URL to hit")
+    parser.add_argument("-n", "--num-clients", help="Number of clients to connect - default 250", action="store",
+                        default="250", type=int)
+    parser.add_argument("-c", "--max-connects", help="Number of connections to simultaniously open - default 15",
+                        action="store", default="15", type=int)
+    args = parser.parse_args()
+
+    # Spin up a client
+    client = WebsocketTestingClient(args.websocket_url, total_connections=args.num_clients,
+                                    max_connecting_sockets=args.max_connects)
+
     # Get the urwid loop
     urwid_loop = build_urwid_loop(client)
 
     urwid_loop.run()
 
     client.loop.close()
+
+if __name__ == "__main__":
+    run()
