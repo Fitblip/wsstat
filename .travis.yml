@@ -4,8 +4,8 @@ python:
 install:
     - "pip install -r requirements.txt"
     - "pip install coverage"
-#    - "pip install coveralls"
+    - "pip install coveralls"
 script:
     - "coverage run --source=wsstat setup.py test"
-#after_success:
-#    coveralls
+after_success:
+    coveralls
