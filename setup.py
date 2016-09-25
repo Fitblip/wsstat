@@ -51,5 +51,6 @@ setup(
     classifiers = [],
     extras_require={
         'testing': ['pytest'],
-    }
+    },
+
 )
