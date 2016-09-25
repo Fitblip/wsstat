@@ -4,9 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Fitblip/wsstat/badge.svg?branch=master)](https://coveralls.io/github/Fitblip/wsstat?branch=master)
 [![PyPi](https://img.shields.io/pypi/dm/wsstat.svg)](https://pypi.python.org/pypi/wsstat/)
 [![PyPi](https://img.shields.io/pypi/v/wsstat.svg)](https://pypi.python.org/pypi/wsstat/)
-
-
-
+[![PyPi](https://img.shields.io/pypi/pyversions/wsstat.svg)](https://pypi.python.org/pypi/wsstat/)
 
 # Demo
 ![demo](https://cloud.githubusercontent.com/assets/1072598/18814490/bb2fb2b0-82c9-11e6-8a35-6b80c0f40dc3.gif)
