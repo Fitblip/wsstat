@@ -4,10 +4,12 @@ from wsstat.main import WebsocketTestingClient, ConnectedWebsocketConnection
 
 class Tests(object):
     def setup(self):
-        self.client = WebsocketTestingClient('wss://testserver/', total_connections=1, max_connecting_sockets=1)
+        self.client = WebsocketTestingClient('wss://testserver/', total_connections=3, max_connecting_sockets=3)
 
-    def teardown(self):
-        pass
+    def test_coroutines(self):
+        print(self.client)
+        assert len(self.client.tasks._children) == (1 + self.client.total_connections)
+
 
 class TestConnectedWebsocketConnection:
     def setup(self):
