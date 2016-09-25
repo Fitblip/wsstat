@@ -5,7 +5,8 @@
 ---
 
 # Demo
-![Imgur](http://i.imgur.com/Kvi6qVA.gif)
+![demo](https://cloud.githubusercontent.com/assets/1072598/18814490/bb2fb2b0-82c9-11e6-8a35-6b80c0f40dc3.gif)
+
 
 # Installation
 Note: wsstat currently only works on Python >= 3.4.
