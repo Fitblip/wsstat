@@ -48,6 +48,7 @@ setup(
             'wsstat = wsstat.main:run',
         ],
     },
+    license = "MIT",
     classifiers = [],
     extras_require={
         'testing': ['pytest'],
