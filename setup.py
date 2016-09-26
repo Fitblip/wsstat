@@ -50,6 +50,12 @@ setup(
     },
     license = "MIT",
     classifiers = [
+        "License :: OSI Approved :: MIT License",
+        "Topic :: Internet :: WWW/HTTP",
+        "Topic :: Software Development :: Testing",
+        "Environment :: Console",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: POSIX",
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
