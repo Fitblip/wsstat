@@ -10,9 +10,7 @@ import urllib.parse
 import asyncio
 from collections import OrderedDict, deque
 
-import urwid
 import websockets
-from urwid import ExitMainLoop
 from websockets.protocol import OPEN
 from wsstat.gui import BlinkBoardWidget, LoggerWidget
 
@@ -52,9 +50,6 @@ class WebsocketTestingClient(object):
     def before_recv(self, statedict):
     def after_recv(self, statedict, message):
     """
-
-    class ExitClient(Exception):
-        pass
 
     def __init__(self, websocket_url, total_connections=250, max_connecting_sockets=5):
         # Configuration stuff

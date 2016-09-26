@@ -91,3 +91,5 @@ ENV/
 
 .idea
 .cache
+
+docs/_build
