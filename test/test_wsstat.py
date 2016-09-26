@@ -3,9 +3,13 @@
 import hashlib
 
 import asyncio
+from unittest import mock
 
+import patch as patch
 from pytest import raises
 from wsstat.clients import WebsocketTestingClient, ConnectedWebsocketConnection
+from wsstat.main import parse_args
+
 
 class TestsMisc(object):
     def test_coroutines(self):
@@ -34,5 +38,14 @@ class TestConnectedWebsocketConnection:
     def test_socket_as_string(self):
         assert str(self.socket) == "<Websocket {}>".format(self.socket.id)
 
-class TestFullClient(object):
-    pass
+class TestParsing(object):
+    import sys
+    ws_url = 'wss://testserver/'
+
+    sys.argv = [sys.argv[0], ws_url]
+
+    args = parse_args()
+
+    assert args.max_connecting_sockets == 15
+    assert args.total_connections == 250
+    assert args.websocket_url == ws_url
