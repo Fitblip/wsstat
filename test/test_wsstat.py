@@ -1,11 +1,6 @@
 # coding=utf-8
 
 import hashlib
-
-import asyncio
-from unittest import mock
-
-import patch as patch
 from pytest import raises
 from wsstat.clients import WebsocketTestingClient, ConnectedWebsocketConnection
 from wsstat.main import parse_args
