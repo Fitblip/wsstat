@@ -1,15 +1,19 @@
+# coding=utf-8
+
 import hashlib
 
-from wsstat.main import WebsocketTestingClient, ConnectedWebsocketConnection
+import asyncio
 
-class Tests(object):
-    def setup(self):
-        self.client = WebsocketTestingClient('wss://testserver/', total_connections=3, max_connecting_sockets=3)
+from pytest import raises
+from wsstat.clients import WebsocketTestingClient, ConnectedWebsocketConnection
 
+class TestsMisc(object):
     def test_coroutines(self):
-        print(self.client)
-        assert len(self.client.tasks._children) == (1 + self.client.total_connections)
-
+        self.client = WebsocketTestingClient('wss://testserver/', total_connections=3, max_connecting_sockets=3)
+        # Make sure we have len(total_connections) + redraw coroutine tasks
+        assert len(self.client.coros) == (1 + self.client.total_connections)
+        with raises(SystemExit, message="Expecting SystemExit"):
+            self.client.exit()
 
 class TestConnectedWebsocketConnection:
     def setup(self):
@@ -30,3 +34,5 @@ class TestConnectedWebsocketConnection:
     def test_socket_as_string(self):
         assert str(self.socket) == "<Websocket {}>".format(self.socket.id)
 
+class TestFullClient(object):
+    pass
