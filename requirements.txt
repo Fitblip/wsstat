@@ -1,3 +1,4 @@
 websockets
 urwid
 pytest
+asyncio

@@ -1,8 +1,6 @@
 # coding=utf-8
-import time
-
 import collections
-
+import time
 import urwid
 import urwid.curses_display
 
@@ -27,7 +25,23 @@ class WSStatConsoleApplication(object):
         def draw_screen(self, xxx_todo_changeme, r):
             pass
 
+    class FixedAsyncLoop(urwid.AsyncioEventLoop):
+        def run(self):
+            """
+            Start the event loop.  Exit the loop when any callback raises
+            an exception.  If ExitMainLoop is raised, exit cleanly.
+            """
+            try:
+                self._loop.run_forever()
+            except (KeyboardInterrupt, SystemExit) as e:
+                pass
+            except Exception as e:
+                print("Exception: {}".format(e))
+                raise
+
     def __init__(self, client):
+        self.client = client
+
         self.screen = urwid.raw_display.Screen()
         # self.screen = self.DummyScreen()
 
@@ -36,22 +50,20 @@ class WSStatConsoleApplication(object):
             footer=urwid.Text("", align='center'),
         )
 
-        client.frame = self.frame
+        self.client.frame = self.frame
 
         self.urwid_loop = urwid.MainLoop(
             self.frame,
             screen=self.screen,
             palette=palette,
-            event_loop=urwid.AsyncioEventLoop(loop=client.loop),
+            event_loop=self.FixedAsyncLoop(loop=client.loop),
             unhandled_input=client.unhandled_input
         )
 
     def run(self):
-        try:
-            self.urwid_loop.run()
-        except KeyboardInterrupt:
-            import sys
-            sys.exit(0)
+        self.urwid_loop.run()
+        import sys
+        sys.exit(0)
 
 class BlinkBoardWidget(object):
     def __init__(self):
@@ -97,7 +109,9 @@ class BlinkBoardWidget(object):
             self.bottom_string.set_text(text)
 
     def get_ws_status(self, websocket, connected, error):
-        if websocket.ws.state == OPEN:
+        if websocket is False:
+            return 'error', error
+        elif websocket.ws.state == OPEN:
             out = time.time() - websocket.last_message_recv
             if out < 0.3:
                 return 'connected_highlight', connected
