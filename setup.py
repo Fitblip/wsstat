@@ -15,8 +15,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open('requirements.txt') as f:
     dependencies = f.read().splitlines()
 
-with open("README.md") as f:
-    long_description = f.read()
+long_description = """
+WSStat is a tool for stress testing and monitoring the health of websocket servers/connections.
+
+You can find a demo at https://cloud.githubusercontent.com/assets/1072598/18814490/bb2fb2b0-82c9-11e6-8a35-6b80c0f40dc3.gif, and the project itself at https://github.com/Fitblip/wsstat.
+
+As of right now this tool is still a bit rough around the edges, but stable enough for a v1.
+"""
 
 class PyTest(TestCommand):
     def finalize_options(self):

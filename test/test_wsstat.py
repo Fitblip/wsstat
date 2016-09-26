@@ -2,7 +2,9 @@
 
 import hashlib
 from pytest import raises
-from wsstat.clients import WebsocketTestingClient, ConnectedWebsocketConnection
+from wsstat.clients import WebsocketTestingClient, ConnectedWebsocketConnection, \
+    WebsocketTestingClientWithRandomApiTokenHeader
+from wsstat.gui import WSStatConsoleApplication
 from wsstat.main import parse_args
 
 
@@ -32,6 +34,18 @@ class TestConnectedWebsocketConnection:
 
     def test_socket_as_string(self):
         assert str(self.socket) == "<Websocket {}>".format(self.socket.id)
+
+    def test_message_handling(self):
+        self.socket.process_message("Testing")
+        assert self.socket.message_count == 1
+
+    def test_building_objects(self):
+        args = parse_args()
+
+        client = WebsocketTestingClientWithRandomApiTokenHeader(**vars(args))
+
+        application = WSStatConsoleApplication(client)
+
 
 class TestParsing(object):
     import sys

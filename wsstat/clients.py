@@ -1,16 +1,15 @@
 # coding=utf-8
+import asyncio
 import hashlib
 import itertools
 import os
-
 import time
 import urllib
 import urllib.parse
-
-import asyncio
-from collections import OrderedDict, deque
-
 import websockets
+import websockets.handshake
+
+from collections import OrderedDict, deque
 from websockets.protocol import OPEN
 from wsstat.gui import BlinkBoardWidget, LoggerWidget
 
@@ -80,6 +79,9 @@ class WebsocketTestingClient(object):
     def messages_per_second(self):
         return self._get_current_messages_per_second()
 
+    def log(self, identifier, message):
+        self.logger.log("[{}] {}".format(identifier, message))
+
     @asyncio.coroutine
     def create_websocket_connection(self):
         statedict = self.before_connect()
@@ -90,11 +92,21 @@ class WebsocketTestingClient(object):
         with (yield from self.connection_semaphore):
             identifier = self.get_identifier(statedict)
 
+            self.log(identifier, 'Connecting to {}'.format(connection_args['uri']))
+
+            start_time = time.time()
+
             # Signify that this socket is connecting
             self.sockets[identifier] = None
 
-            # Await the connection to complete successfully
-            websocket = yield from websockets.connect(**connection_args)
+            try:
+                # Await the connection to complete successfully
+                websocket = yield from websockets.connect(**connection_args)
+                websocket.connection_time = time.time() - start_time
+            except BaseException as e:
+                self.logger.log("[{}] {}".format(identifier, e))
+                self.sockets[identifier] = False
+                return True
 
             # Create our handler object
             connected_websocket = ConnectedWebsocketConnection(websocket, identifier)
@@ -105,7 +117,7 @@ class WebsocketTestingClient(object):
             self.sockets[identifier] = connected_websocket
 
             # Log that we connected successfully
-            self.logger.log("[{}] Connected!".format(connected_websocket.id))
+            self.logger.log("[{}] Connected in {:.4f} ms".format(connected_websocket.id, websocket.connection_time * 1000.00))
 
             self.after_connect(statedict)
 
@@ -114,7 +126,6 @@ class WebsocketTestingClient(object):
             while True:
 
                 if self._exiting:
-                    #import ipdb; ipdb.set_trace()
                     yield from websocket.close()
                     return True
 
@@ -140,7 +151,6 @@ class WebsocketTestingClient(object):
         status_line = "{hostname} | Connections: [{current}/{total}] | Total Messages: {message_count} | Messages/Second: {msgs_per_second}/s"
 
         while True:
-
             if self._exiting:
                 return True
                 #raise urwid.ExitMainLoop
@@ -169,6 +179,7 @@ class WebsocketTestingClient(object):
             self.frame.footer.set_text(status_message)
 
     def setup_tasks(self):
+
         coroutines = []
         for _ in range(self.total_connections):
             coro = self.create_websocket_connection()
