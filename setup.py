@@ -45,7 +45,7 @@ setup(
     test_suite='test.test_wsstat',
     entry_points={
         'console_scripts': [
-            'wsstat = wsstat.main:run',
+            'wsstat = wsstat.main:wsstat_console',
         ],
     },
     license = "MIT",
