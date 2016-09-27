@@ -33,11 +33,8 @@ class WSStatConsoleApplication(object):
             """
             try:
                 self._loop.run_forever()
-            except (KeyboardInterrupt, SystemExit) as e:
+            except (KeyboardInterrupt, SystemExit):
                 pass
-            except Exception as e:
-                print("Exception: {}".format(e))
-                raise
 
     def __init__(self, client):
         self.client = client

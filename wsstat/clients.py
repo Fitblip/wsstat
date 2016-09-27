@@ -50,7 +50,7 @@ class WebsocketTestingClient(object):
     def after_recv(self, statedict, message):
     """
 
-    def __init__(self, websocket_url, total_connections=250, max_connecting_sockets=5):
+    def __init__(self, websocket_url, total_connections=250, max_connecting_sockets=5, setup_tasks=True):
         # Configuration stuff
         self.frame = None
         self.websocket_url = urllib.parse.urlparse(websocket_url)
@@ -66,7 +66,8 @@ class WebsocketTestingClient(object):
         self.sockets = OrderedDict()
         self.ring_buffer = deque(maxlen=10)
 
-        self.setup_tasks()
+        if setup_tasks:
+            self.setup_tasks()
 
         self.blinkboard = BlinkBoardWidget()
         self.logger = LoggerWidget()
@@ -106,7 +107,7 @@ class WebsocketTestingClient(object):
             except BaseException as e:
                 self.logger.log("[{}] {}".format(identifier, e))
                 self.sockets[identifier] = False
-                return True
+                return False
 
             # Create our handler object
             connected_websocket = ConnectedWebsocketConnection(websocket, identifier)
@@ -124,7 +125,6 @@ class WebsocketTestingClient(object):
         try:
             # Just loop and recv messages
             while True:
-
                 if self._exiting:
                     yield from websocket.close()
                     return True
@@ -144,6 +144,7 @@ class WebsocketTestingClient(object):
         except Exception as e:
             # Log the exception
             self.logger.log("[{}] {}".format(connected_websocket.id, e))
+            return False
 
     @asyncio.coroutine
     def update_urwid(self):
@@ -179,19 +180,18 @@ class WebsocketTestingClient(object):
             self.frame.footer.set_text(status_message)
 
     def setup_tasks(self):
-
-        coroutines = []
+        tasks = []
         for _ in range(self.total_connections):
             coro = self.create_websocket_connection()
-            coroutines.append(coro)
-            asyncio.ensure_future(coro)
+            tasks.append(asyncio.ensure_future(coro))
 
         update_urwid_coro = self.update_urwid()
-        asyncio.ensure_future(update_urwid_coro)
-        coroutines.append(update_urwid_coro)
+        tasks.append(asyncio.ensure_future(update_urwid_coro))
+
+        self.future = asyncio.gather(*tasks)
 
         # Gather all the tasks needed
-        self.coros = coroutines
+        self.coros = tasks
 
     def exit(self):
         self._exiting = True

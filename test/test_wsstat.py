@@ -1,20 +1,14 @@
 # coding=utf-8
 
 import hashlib
-from pytest import raises
-from wsstat.clients import WebsocketTestingClient, ConnectedWebsocketConnection, \
-    WebsocketTestingClientWithRandomApiTokenHeader
+from unittest import mock
+
+import pytest
+
+from wsstat.clients import ConnectedWebsocketConnection, WebsocketTestingClient
 from wsstat.gui import WSStatConsoleApplication
-from wsstat.main import parse_args
+from wsstat.main import parse_args, wsstat_console
 
-
-class TestsMisc(object):
-    def test_coroutines(self):
-        self.client = WebsocketTestingClient('wss://testserver/', total_connections=3, max_connecting_sockets=3)
-        # Make sure we have len(total_connections) + redraw coroutine tasks
-        assert len(self.client.coros) == (1 + self.client.total_connections)
-        with raises(SystemExit, message="Expecting SystemExit"):
-            self.client.exit()
 
 class TestConnectedWebsocketConnection:
     def setup(self):
@@ -39,15 +33,7 @@ class TestConnectedWebsocketConnection:
         self.socket.process_message("Testing")
         assert self.socket.message_count == 1
 
-    def test_building_objects(self):
-        args = parse_args()
-
-        client = WebsocketTestingClientWithRandomApiTokenHeader(**vars(args))
-
-        application = WSStatConsoleApplication(client)
-
-
-class TestParsing(object):
+def test_parsing_arguments():
     import sys
     ws_url = 'wss://testserver/'
 
@@ -58,3 +44,45 @@ class TestParsing(object):
     assert args.max_connecting_sockets == 15
     assert args.total_connections == 250
     assert args.websocket_url == ws_url
+
+@mock.patch('wsstat.main.WSStatConsoleApplication')
+@mock.patch('wsstat.main.WebsocketTestingClientWithRandomApiTokenHeader')
+def test_client_setup(console_class, client_class):
+    wsstat_console()
+
+@mock.patch('wsstat.gui.urwid.MainLoop')
+def test_client_run(mainloop):
+    client = WebsocketTestingClient(
+        websocket_url='wss://testserver/',
+        total_connections=1,
+        max_connecting_sockets=1,
+        setup_tasks=False
+    )
+    console = WSStatConsoleApplication(client)
+
+    assert WSStatConsoleApplication.DummyScreen().draw_screen(None, None) == None
+
+    with pytest.raises(SystemExit):
+        console.run()
+
+    assert client.messages_per_second == '0.00'
+
+def test_fixed_async_loop():
+    def raise_KeyboardInterrupt():
+        raise KeyboardInterrupt
+    def raise_SystemExit():
+        raise SystemExit
+    def raise_generic_Exception():
+        raise Exception
+
+    loop = WSStatConsoleApplication.FixedAsyncLoop()
+
+    loop._loop.run_forever = raise_KeyboardInterrupt
+    loop.run()
+
+    loop._loop.run_forever = raise_SystemExit
+    loop.run()
+
+    loop._loop.run_forever = raise_generic_Exception
+    with pytest.raises(Exception):
+        loop.run()

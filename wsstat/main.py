@@ -38,6 +38,3 @@ def wsstat_console():
     application = WSStatConsoleApplication(client)
 
     application.run()
-
-if __name__ == "__main__":
-    wsstat_console()
