@@ -13,7 +13,7 @@
 
 
 # Installation
-Note: wsstat currently only works on Python >= 3.4.
+Note: wsstat currently only works on Python >= 3.3.
 
 If you're on python3.5 exclusively, it's as simple as:
 ```
