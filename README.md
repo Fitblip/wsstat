@@ -15,7 +15,7 @@
 # Installation
 Note: wsstat currently only works on Python >= 3.3.
 
-If you're on python3.5 exclusively, it's as simple as:
+If you're on python >= 3.3 exclusively, it's as simple as:
 ```
 pip install wsstat
 ```
