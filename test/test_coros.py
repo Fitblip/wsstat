@@ -18,7 +18,7 @@ class TestCoros(object):
             )
         )
 
-    def test_bad_handshake(self, event_loop):
+    def test_bad_handshake(self):
         event_loop = asyncio.new_event_loop()
         try:
             assert len(asyncio.Task.all_tasks(event_loop)) == 0
@@ -34,7 +34,7 @@ class TestCoros(object):
         finally:
             event_loop.stop()
 
-    def test_invalid_ws_url(self, event_loop):
+    def test_invalid_ws_url(self):
         event_loop = asyncio.new_event_loop()
         try:
             assert len(asyncio.Task.all_tasks(event_loop)) == 0
