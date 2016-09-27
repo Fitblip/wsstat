@@ -26,8 +26,8 @@ pip3 install wsstat
 
 # Usage
 ```
-$ python3.5 main.py -h
-usage: main.py [-h] [-n NUM_CLIENTS] [-c MAX_CONNECTS] websocket_url
+$ wsstat -h
+usage: wsstat [-h] [-n NUM_CLIENTS] [-c MAX_CONNECTS] websocket_url
 
 positional arguments:
   websocket_url         The websocket URL to hit
