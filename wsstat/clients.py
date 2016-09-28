@@ -6,12 +6,17 @@ import os
 import time
 import urllib
 import urllib.parse
+from ssl import CertificateError
+
+import urwid
 import websockets
 import websockets.handshake
 
 from collections import OrderedDict, deque
 from websockets.protocol import OPEN
 from wsstat.gui import BlinkBoardWidget, LoggerWidget
+
+import logging
 
 class ConnectedWebsocketConnection(object):
     def __init__(self, ws, identifier):
@@ -59,6 +64,7 @@ class WebsocketTestingClient(object):
 
         # Asyncio stuff
         self.loop = asyncio.get_event_loop()
+        self.loop.set_exception_handler(self.handle_exceptions)
         self.connection_semaphore = asyncio.Semaphore(max_connecting_sockets)
 
         # Counts and buffers
@@ -71,10 +77,23 @@ class WebsocketTestingClient(object):
 
         self.blinkboard = BlinkBoardWidget()
         self.logger = LoggerWidget()
-        self.widgets = [
-            self.blinkboard.widget,
-            (10, self.logger.widget)
-        ]
+        self.default_view = urwid.Pile([
+            self.blinkboard.default_widget,
+            (10, self.logger.default_widget)
+        ])
+
+        self.logger_view = urwid.Pile([
+            self.logger.logger_widget,
+        ])
+
+        self.graph_view = urwid.Pile([
+            self.logger.graph_widget,
+        ])
+
+        self.small_blink_and_graph_view = urwid.Pile([
+            self.logger.graph_widget,
+            (10, urwid.LineBox(self.blinkboard.small_blinks)),
+        ])
 
     @property
     def messages_per_second(self):
@@ -105,7 +124,11 @@ class WebsocketTestingClient(object):
                 websocket = yield from websockets.connect(**connection_args)
                 websocket.connection_time = time.time() - start_time
             except BaseException as e:
-                self.logger.log("[{}] {}".format(identifier, e))
+                if isinstance(e, CertificateError):
+                    self.logger.log("[{}] SSL connection problem! {}".format(identifier, e))
+                else:
+                    self.logger.log("[{}] {}".format(identifier, e))
+
                 self.sockets[identifier] = False
                 return False
 
@@ -198,9 +221,27 @@ class WebsocketTestingClient(object):
         import sys
         sys.exit(0)
 
-    def unhandled_input(self, keypress):
+    def handle_keypresses(self, keypress):
         if keypress == "q" or keypress == 'ctrl c':
             self.exit()
+
+        keymap = {
+            "l": self.logger_view,
+            "g": self.graph_view,
+            "tab": self.small_blink_and_graph_view,
+            "esc": self.default_view
+        }
+
+        try:
+            requested_view = keymap[keypress]
+        except KeyError:
+            return True
+
+        if self.frame.body == requested_view:
+            self.frame.body = self.default_view
+        else:
+            self.frame.body = requested_view
+
         return True
 
     def _get_current_messages_per_second(self):
@@ -235,6 +276,9 @@ class WebsocketTestingClient(object):
 
     def get_identifier(self, statedict):
         return hashlib.sha256(os.urandom(4)).hexdigest()[:8]
+
+    def handle_exceptions(self, loop, context):
+        logging.error("Exception! : {}".format(str(context.get('exception'))))
 
 class WebsocketTestingClientWithRandomApiTokenHeader(WebsocketTestingClient):
     """

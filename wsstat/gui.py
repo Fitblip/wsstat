@@ -8,6 +8,7 @@ from websockets.protocol import OPEN, CLOSING, CLOSED
 
 palette = [
     ('starting', 'white', ''),
+    ('starting_text', 'black', 'yellow'),
     ('connected', 'black', 'dark green'),
     ('connected_highlight', 'black', 'white'),
     ('error', 'black', 'dark red'),
@@ -43,7 +44,7 @@ class WSStatConsoleApplication(object):
         # self.screen = self.DummyScreen()
 
         self.frame = urwid.Frame(
-            urwid.Pile(client.widgets),
+            client.default_view,
             footer=urwid.Text("", align='center'),
         )
 
@@ -54,7 +55,7 @@ class WSStatConsoleApplication(object):
             screen=self.screen,
             palette=palette,
             event_loop=self.FixedAsyncLoop(loop=client.loop),
-            unhandled_input=client.unhandled_input
+            unhandled_input=client.handle_keypresses
         )
 
     def run(self):
@@ -67,10 +68,12 @@ class BlinkBoardWidget(object):
         self.top_string = urwid.Text('')
         self.bottom_string = urwid.Text('')
 
-        self.widget = urwid.LineBox(
+        self.small_blinks = urwid.Filler(self.top_string, 'top')
+        self.large_blinks = ('weight', 10, urwid.Filler(self.bottom_string, 'top'))
+
+        self.default_widget = urwid.LineBox(
             urwid.Pile([
-                urwid.Filler(self.top_string, 'top'),
-                ('weight', 10, urwid.Filler(self.bottom_string, 'bottom')),
+                self.large_blinks
             ]),
             title='Websockets'
         )
@@ -78,21 +81,19 @@ class BlinkBoardWidget(object):
     def generate_blinkers(self, connected_sockets):
         if connected_sockets:
             compact_dashboard = []
+            message_counts = []
             for websocket_id, websocket in connected_sockets.items():
                 if websocket is None:
                     compact_dashboard.append(('starting', "*"))
+                    message_counts.append(('starting_text', "{}".format(websocket_id)))
+                    message_counts.append(":     ")
+
                 else:
                     compact_dashboard.append(self.get_ws_status(websocket, "C", "E"))
+                    status_string = self.get_ws_status(websocket, websocket.id[:8], websocket.id[:8])
 
-            message_counts = []
-            active_sockets = [x for x in connected_sockets.values() if x]
-            active_sockets.sort(key=lambda x: x.ws.state)
-
-            for socket in active_sockets:
-                status_string = self.get_ws_status(socket, socket.id[:8], socket.id[:8])
-
-                message_counts.append(status_string)
-                message_counts.append(":{} ".format(str(socket.message_count).ljust(4)))
+                    message_counts.append(status_string)
+                    message_counts.append(":{} ".format(str(websocket.message_count).ljust(4)))
 
             self.set_top_string(compact_dashboard)
             self.set_bottom_string(message_counts)
@@ -136,15 +137,21 @@ class LoggerWidget(object):
             }
         )
 
-        self.graph_box = urwid.LineBox(self.graph, title=self.graph_title)
+        self.graph_widget = urwid.LineBox(self.graph, title=self.graph_title)
 
-        self.widget = urwid.Columns([
+        self.default_widget = urwid.Columns([
             urwid.LineBox(
                 self.list_box,
                 title="Logger"
             ),
-            self.graph_box
+            self.graph_widget
         ])
+
+        self.logger_widget = urwid.LineBox(
+            self.list_box,
+            title="Logger"
+        )
+
 
     def log(self, string):
         self.walker.append(urwid.Text(string))
@@ -156,6 +163,6 @@ class LoggerWidget(object):
         top = max([x[0] for x in graph_data])
         if top > 0:
             self.graph.set_data(graph_data, top)
-            self.graph_box.title_widget.set_text(self.graph_title + "| Y-Max:{} ".format(top))
+            self.graph_widget.title_widget.set_text(self.graph_title + "| Y-Max:{} ".format(top))
         else:
-            self.graph_box.title_widget.set_text(self.graph_title)
+            self.graph_widget.title_widget.set_text(self.graph_title)
