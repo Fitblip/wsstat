@@ -55,7 +55,8 @@ class WSStatConsoleApplication(object):
             screen=self.screen,
             palette=palette,
             event_loop=self.FixedAsyncLoop(loop=client.loop),
-            unhandled_input=client.handle_keypresses
+            unhandled_input=client.handle_keypresses,
+            pop_ups=True
         )
 
     def run(self):
@@ -66,7 +67,7 @@ class WSStatConsoleApplication(object):
 class BlinkBoardWidget(object):
     def __init__(self):
         self.top_string = urwid.Text('')
-        self.bottom_string = urwid.Text('')
+        self.bottom_string  = urwid.Text('')
 
         self.small_blinks = urwid.Filler(self.top_string, 'top')
         self.large_blinks = ('weight', 10, urwid.Filler(self.bottom_string, 'top'))
@@ -80,31 +81,30 @@ class BlinkBoardWidget(object):
 
     def generate_blinkers(self, connected_sockets):
         if connected_sockets:
-            compact_dashboard = []
-            message_counts = []
+            small_blinkers = []
+            large_blinkers = []
             for websocket_id, websocket in connected_sockets.items():
                 if websocket is None:
-                    compact_dashboard.append(('starting', "*"))
-                    message_counts.append(('starting_text', "{}".format(websocket_id)))
-                    message_counts.append(":     ")
+                    small_blinkers.append(('starting', "*"))
+                    large_blinkers.append(('starting_text', "{}".format(websocket_id)))
+                    large_blinkers.append(":_    ")
 
                 else:
-                    compact_dashboard.append(self.get_ws_status(websocket, "C", "E"))
-                    status_string = self.get_ws_status(websocket, websocket.id[:8], websocket.id[:8])
+                    small_blinkers.append(self.get_ws_status(websocket, "C", "E"))
 
-                    message_counts.append(status_string)
-                    message_counts.append(":{} ".format(str(websocket.message_count).ljust(4)))
+                    large_blinkers.append(self.get_ws_status(websocket, websocket.id[:8], websocket.id[:8]))
+                    large_blinkers.append(":{} ".format(str(websocket.message_count).ljust(4)))
 
-            self.set_top_string(compact_dashboard)
-            self.set_bottom_string(message_counts)
+            self.update_small_blinkers(small_blinkers)
+            self.update_large_blinkers(large_blinkers)
 
-    def set_top_string(self, text):
-        if text:
-            self.top_string.set_text(text)
+    def update_small_blinkers(self, blinkers):
+        if blinkers:
+           self.top_string.set_text(blinkers)
 
-    def set_bottom_string(self, text):
-        if text:
-            self.bottom_string.set_text(text)
+    def update_large_blinkers(self, blinkers):
+        if blinkers:
+            self.bottom_string.set_text(blinkers)
 
     def get_ws_status(self, websocket, connected, error):
         if websocket is False:
