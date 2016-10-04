@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://babeljs.io/">
-    <img alt="babel" src="https://cloud.githubusercontent.com/assets/1072598/19067433/0657350a-89d3-11e6-92ef-9e20fd8245ac.png" width="546">
+  <a href="https://pypi.python.org/pypi/wsstat/">
+    <img alt="wsstat" src="https://cloud.githubusercontent.com/assets/1072598/19067433/0657350a-89d3-11e6-92ef-9e20fd8245ac.png" width="546">
   </a>
 </p>
 
@@ -9,11 +9,12 @@
 </p>
 
 <p align="center">
-  <a href="https://travis-ci.org/Fitblip/wsstat"><img src="https://travis-ci.org/Fitblip/wsstat.svg?branch=master" alt="Build Status" data-canonical-src="https://travis-ci.org/Fitblip/wsstat.svg?branch=master" style="max-width:100%;"></a>
-<a href="https://coveralls.io/github/Fitblip/wsstat?branch=master"><img src="https://coveralls.io/repos/github/Fitblip/wsstat/badge.svg?branch=master" alt="Coverage Status" data-canonical-src="https://coveralls.io/repos/github/Fitblip/wsstat/badge.svg?branch=master" style="max-width:100%;"></a>
-<a href="https://pypi.python.org/pypi/wsstat/"><img src="https://img.shields.io/pypi/v/wsstat.svg" alt="PyPi" data-canonical-src="https://img.shields.io/pypi/v/wsstat.svg" style="max-width:100%;"></a>
-<a href="https://pypi.python.org/pypi/wsstat/"><img src="https://img.shields.io/pypi/l/wsstat.svg" alt="PyPi" data-canonical-src="https://img.shields.io/pypi/l/wsstat.svg" style="max-width:100%;"></a>
-<a href="https://pypi.python.org/pypi/wsstat/"><img src="https://img.shields.io/pypi/pyversions/wsstat.svg" alt="PyPi" data-canonical-src="https://img.shields.io/pypi/pyversions/wsstat.svg" style="max-width:100%;"></a></p>
+    <a href="https://travis-ci.org/Fitblip/wsstat"><img src="https://travis-ci.org/Fitblip/wsstat.svg?branch=master" alt="Build Status" data-canonical-src="https://travis-ci.org/Fitblip/wsstat.svg?branch=master" style="max-width:100%;"></a>
+    <a href="https://coveralls.io/github/Fitblip/wsstat?branch=master"><img src="https://coveralls.io/repos/github/Fitblip/wsstat/badge.svg?branch=master" alt="Coverage Status" data-canonical-src="https://coveralls.io/repos/github/Fitblip/wsstat/badge.svg?branch=master" style="max-width:100%;"></a>
+    <a href="https://pypi.python.org/pypi/wsstat/"><img src="https://img.shields.io/pypi/v/wsstat.svg" alt="PyPi" data-canonical-src="https://img.shields.io/pypi/v/wsstat.svg" style="max-width:100%;"></a>
+    <a href="https://pypi.python.org/pypi/wsstat/"><img src="https://img.shields.io/pypi/l/wsstat.svg" alt="PyPi" data-canonical-src="https://img.shields.io/pypi/l/wsstat.svg" style="max-width:100%;"></a>
+    <a href="https://pypi.python.org/pypi/wsstat/"><img src="https://img.shields.io/pypi/pyversions/wsstat.svg" alt="PyPi" data-canonical-src="https://img.shields.io/pypi/pyversions/wsstat.svg" style="max-width:100%;"></a>
+</p>
 
 
 # Demo
