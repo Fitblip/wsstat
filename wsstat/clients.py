@@ -117,8 +117,7 @@ class WebsocketTestingClient(object):
         with (yield from self.connection_semaphore):
             identifier = self.get_identifier(statedict)
 
-            #self.log(identifier, 'Connecting to {}'.format(connection_args['uri']))
-            self.log(identifier, 'Connecting to {}'.format("wss.fitblip.pub"))
+            self.log(identifier, 'Connecting to {}'.format(connection_args['uri']))
 
             start_time = time.time()
 
@@ -204,8 +203,7 @@ class WebsocketTestingClient(object):
             self.blinkboard.generate_blinkers(self.sockets)
             # Make the status message
             status_message = status_line.format(
-                #hostname=self.websocket_url.netloc,
-                hostname='wss.fitblip.pub',
+                hostname=self.websocket_url.netloc,
                 current=currently_connected_sockets,
                 total=self.total_connections,
                 message_count=global_message_count,
