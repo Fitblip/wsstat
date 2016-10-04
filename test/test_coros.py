@@ -30,7 +30,7 @@ class TestCoros(object):
                 # Make sure that the logger was called
                 assert self.client.logger.log.call_count > 0
                 # Ensure that there was a failed connection
-                assert self.client.sockets[self.identifier] == False
+                assert isinstance(self.client.sockets[self.identifier], BaseException)
         finally:
             event_loop.stop()
 

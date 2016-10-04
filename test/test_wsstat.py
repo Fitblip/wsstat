@@ -46,7 +46,7 @@ def test_parsing_arguments():
     assert args.websocket_url == ws_url
 
 @mock.patch('wsstat.main.WSStatConsoleApplication')
-@mock.patch('wsstat.main.WebsocketTestingClientWithRandomApiTokenHeader')
+@mock.patch('wsstat.main.WebsocketTestingClient')
 def test_client_setup(console_class, client_class):
     wsstat_console()
 
