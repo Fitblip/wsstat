@@ -2,11 +2,11 @@
 # coding=utf-8
 import argparse
 
-from wsstat.clients import WebsocketTestingClientWithRandomApiTokenHeader
+from wsstat.clients import WebsocketTestingClient
 from wsstat.gui import WSStatConsoleApplication
 
 def parse_args():
-    parser = argparse.ArgumentParser(epilog="Note: this is very much so in flux right now so don't expect anything to remain the same!")
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "websocket_url",
         help="The websocket URL to hit"
@@ -27,13 +27,21 @@ def parse_args():
         default="15",
         type=int
     )
+    parser.add_argument(
+        '-H', "--header",
+        help="Pass a custom header with each websocket connection",
+        dest="header",
+        action="store",
+        default=None,
+        type=str
+    )
     args = parser.parse_args()
     return args
 
 def wsstat_console():
     args = parse_args()
 
-    client = WebsocketTestingClientWithRandomApiTokenHeader(**vars(args))
+    client = WebsocketTestingClient(**vars(args))
 
     application = WSStatConsoleApplication(client)
 

@@ -13,11 +13,11 @@ palette = [
     ('connected_highlight', 'black', 'white'),
     ('error', 'black', 'dark red'),
 
-    ('graph bg background','light gray', 'black'),
-    ('graph bg 1',         'black',      'dark blue', 'standout'),
-    ('graph bg 1 smooth',  'dark blue',  'black'),
-    ('graph bg 2',         'black',      'dark cyan', 'standout'),
-    ('graph bg 2 smooth',  'dark cyan',  'black'),
+    ('graph bg background','light gray', ''),
+    ('graph bg 1',         '',      'dark blue', 'standout'),
+    ('graph bg 1 smooth',  'dark blue',  ''),
+    ('graph bg 2',         '',      'dark cyan', 'standout'),
+    ('graph bg 2 smooth',  'dark cyan',  ''),
 ]
 
 class WSStatConsoleApplication(object):
@@ -83,17 +83,28 @@ class BlinkBoardWidget(object):
         if connected_sockets:
             small_blinkers = []
             large_blinkers = []
-            for websocket_id, websocket in connected_sockets.items():
+            padding = len(str(len(connected_sockets)))
+
+            try:
+                individual_padding = len(str(max([x[1].message_count for x in connected_sockets.items() if hasattr(x[1],'ws')])))
+            except:
+                individual_padding = 4
+
+            for index, (websocket_id, websocket) in enumerate(connected_sockets.items()):
+                websocket_index = str(index+1).rjust(padding, "0")
                 if websocket is None:
                     small_blinkers.append(('starting', "*"))
-                    large_blinkers.append(('starting_text', "{}".format(websocket_id)))
-                    large_blinkers.append(":_    ")
+                    large_blinkers.append(('starting_text', "{}".format(websocket_index)))
+                    large_blinkers.append(":_ ".ljust(individual_padding))
 
                 else:
                     small_blinkers.append(self.get_ws_status(websocket, "C", "E"))
 
-                    large_blinkers.append(self.get_ws_status(websocket, websocket.id[:8], websocket.id[:8]))
-                    large_blinkers.append(":{} ".format(str(websocket.message_count).ljust(4)))
+                    large_blinkers.append(self.get_ws_status(websocket, websocket_index, websocket_index))
+                    if isinstance(websocket, BaseException):
+                        large_blinkers.append(":{} ".format("E".ljust(individual_padding)))
+                    else:
+                        large_blinkers.append(":{} ".format(str(websocket.message_count).ljust(individual_padding)))
 
             self.update_small_blinkers(small_blinkers)
             self.update_large_blinkers(large_blinkers)
@@ -107,8 +118,9 @@ class BlinkBoardWidget(object):
             self.bottom_string.set_text(blinkers)
 
     def get_ws_status(self, websocket, connected, error):
-        if websocket is False:
+        if websocket is False or isinstance(websocket, BaseException):
             return 'error', error
+
         elif websocket.ws.state == OPEN:
             out = time.time() - websocket.last_message_recv
             if out < 0.3:

@@ -55,12 +55,13 @@ class WebsocketTestingClient(object):
     def after_recv(self, statedict, message):
     """
 
-    def __init__(self, websocket_url, total_connections=250, max_connecting_sockets=5, setup_tasks=True):
+    def __init__(self, websocket_url, total_connections=250, max_connecting_sockets=5, setup_tasks=True, header=None):
         # Configuration stuff
         self.frame = None
         self.websocket_url = urllib.parse.urlparse(websocket_url)
         self.total_connections = total_connections
         self._exiting = False
+        self.extra_headers = None
 
         # Asyncio stuff
         self.loop = asyncio.get_event_loop()
@@ -69,8 +70,12 @@ class WebsocketTestingClient(object):
 
         # Counts and buffers
         self.global_message_counter = itertools.count()
+        self.socket_count = itertools.count(1)
         self.sockets = OrderedDict()
         self.ring_buffer = deque(maxlen=10)
+
+        if header:
+            self.extra_headers = dict([map(lambda x: x.strip(), header.split(':'))])
 
         if setup_tasks:
             self.setup_tasks()
@@ -112,7 +117,8 @@ class WebsocketTestingClient(object):
         with (yield from self.connection_semaphore):
             identifier = self.get_identifier(statedict)
 
-            self.log(identifier, 'Connecting to {}'.format(connection_args['uri']))
+            #self.log(identifier, 'Connecting to {}'.format(connection_args['uri']))
+            self.log(identifier, 'Connecting to {}'.format("wss.fitblip.pub"))
 
             start_time = time.time()
 
@@ -130,6 +136,10 @@ class WebsocketTestingClient(object):
                     self.logger.log("[{}] {}".format(identifier, e))
 
                 self.sockets[identifier] = False
+
+                if isinstance(e, websockets.InvalidHandshake):
+                    self.sockets[identifier] = e
+
                 return False
 
             # Create our handler object
@@ -186,7 +196,7 @@ class WebsocketTestingClient(object):
             global_message_count = int(repr(self.global_message_counter)[6:-1])
             self.ring_buffer.append(global_message_count)
 
-            currently_connected_sockets = len([x for x in self.sockets.values() if x and x.ws.state == OPEN])
+            currently_connected_sockets = len([x for x in self.sockets.values() if x and not isinstance(x, BaseException) and x.ws.state == OPEN])
 
             self.logger.update_graph_data([self.messages_per_second,])
 
@@ -194,7 +204,8 @@ class WebsocketTestingClient(object):
             self.blinkboard.generate_blinkers(self.sockets)
             # Make the status message
             status_message = status_line.format(
-                hostname=self.websocket_url.netloc,
+                #hostname=self.websocket_url.netloc,
+                hostname='wss.fitblip.pub',
                 current=currently_connected_sockets,
                 total=self.total_connections,
                 message_count=global_message_count,
@@ -272,10 +283,11 @@ class WebsocketTestingClient(object):
     def setup_websocket_connection(self, statedict):
         return {
             "uri": self.websocket_url.geturl(),
+            "extra_headers": self.extra_headers
         }
 
     def get_identifier(self, statedict):
-        return hashlib.sha256(os.urandom(4)).hexdigest()[:8]
+        return next(self.socket_count)
 
     def handle_exceptions(self, loop, context):
         logging.error("Exception! : {}".format(str(context.get('exception'))))

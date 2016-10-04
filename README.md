@@ -9,7 +9,7 @@
 
 
 # Demo
-![demo](https://cloud.githubusercontent.com/assets/1072598/18814490/bb2fb2b0-82c9-11e6-8a35-6b80c0f40dc3.gif)
+![demo](https://cloud.githubusercontent.com/assets/1072598/19066857/48e13252-89d0-11e6-9ff3-ef2c69ae815e.gif)
 
 
 # Installation
@@ -27,15 +27,20 @@ pip3 install wsstat
 # Usage
 ```
 $ wsstat -h
-usage: wsstat [-h] [-n NUM_CLIENTS] [-c MAX_CONNECTS] websocket_url
+usage: wsstat [-h] [-n TOTAL_CONNECTIONS] [-c MAX_CONNECTING_SOCKETS]
+                 [-H HEADER]
+                 websocket_url
 
 positional arguments:
   websocket_url         The websocket URL to hit
 
 optional arguments:
   -h, --help            show this help message and exit
-  -n NUM_CLIENTS, --num-clients NUM_CLIENTS
+  -n TOTAL_CONNECTIONS, --num-clients TOTAL_CONNECTIONS
                         Number of clients to connect - default 250
-  -c MAX_CONNECTS, --max-connects MAX_CONNECTS
-                        Number of connections to simultaniously open - default 15
+  -c MAX_CONNECTING_SOCKETS, --max-connects MAX_CONNECTING_SOCKETS
+                        Number of connections to simultaniously open - default
+                        15
+  -H HEADER, --header HEADER
+                        Pass a custom header with each websocket connection
 ```
