@@ -4,13 +4,18 @@ import asyncio
 import datetime
 import random
 import websockets
+import sys
 
-async def echo_time(websocket, path):
+if sys.version_info < (3, 4, 4):
+    asyncio.ensure_future = asyncio.async
+
+@asyncio.coroutine
+def echo_time(websocket, path):
     while True:
         now = datetime.datetime.utcnow().isoformat() + 'Z'
         try:
-            await websocket.send(now)
-            await asyncio.sleep(random.random() * 3)
+            yield from websocket.send(now)
+            yield from asyncio.sleep(random.random() * 3)
         except:
             pass
 

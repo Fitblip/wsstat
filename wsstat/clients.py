@@ -17,6 +17,10 @@ from websockets.protocol import OPEN
 from wsstat.gui import BlinkBoardWidget, LoggerWidget
 
 import logging
+import sys
+
+if sys.version_info < (3, 4, 4):
+    asyncio.ensure_future = asyncio.async
 
 class ConnectedWebsocketConnection(object):
     def __init__(self, ws, identifier):
@@ -150,10 +154,7 @@ class WebsocketTestingClient(object):
 
                             return False
 
-
-                yield from asyncio.sleep(.25)
-
-
+                yield from asyncio.sleep(.25, loop=self.loop)
 
             # Create our handler object
             connected_websocket = ConnectedWebsocketConnection(websocket, identifier)
