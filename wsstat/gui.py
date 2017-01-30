@@ -21,7 +21,7 @@ palette = [
 ]
 
 class WSStatConsoleApplication(object):
-    # Used for debugging (doesn't actuall render screen output while calculating everyhting)
+    # Used for debugging (doesn't actually render screen output while calculating everything)
     class DummyScreen(urwid.raw_display.Screen):
         def draw_screen(self, xxx_todo_changeme, r):
             pass
@@ -92,7 +92,7 @@ class BlinkBoardWidget(object):
 
             for index, (websocket_id, websocket) in enumerate(connected_sockets.items()):
                 websocket_index = str(index+1).rjust(padding, "0")
-                if websocket is None:
+                if not websocket:
                     small_blinkers.append(('starting', "*"))
                     large_blinkers.append(('starting_text', "{}".format(websocket_index)))
                     large_blinkers.append(":_ ".ljust(individual_padding))

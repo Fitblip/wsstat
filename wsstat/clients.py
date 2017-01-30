@@ -55,18 +55,19 @@ class WebsocketTestingClient(object):
     def after_recv(self, statedict, message):
     """
 
-    def __init__(self, websocket_url, total_connections=250, max_connecting_sockets=5, setup_tasks=True, header=None):
+    def __init__(self, websocket_url, **kwargs):
+
         # Configuration stuff
         self.frame = None
         self.websocket_url = urllib.parse.urlparse(websocket_url)
-        self.total_connections = total_connections
+        self.total_connections = kwargs.get('total_connections', 250)
         self._exiting = False
         self.extra_headers = None
 
         # Asyncio stuff
         self.loop = asyncio.get_event_loop()
         self.loop.set_exception_handler(self.handle_exceptions)
-        self.connection_semaphore = asyncio.Semaphore(max_connecting_sockets)
+        self.connection_semaphore = asyncio.Semaphore(kwargs.get('max_connecting_sockets', 15))
 
         # Counts and buffers
         self.global_message_counter = itertools.count()
@@ -74,10 +75,10 @@ class WebsocketTestingClient(object):
         self.sockets = OrderedDict()
         self.ring_buffer = deque(maxlen=10)
 
-        if header:
-            self.extra_headers = dict([map(lambda x: x.strip(), header.split(':'))])
+        if kwargs.get('header'):
+            self.extra_headers = dict([map(lambda x: x.strip(), kwargs['header'].split(':'))])
 
-        if setup_tasks:
+        if kwargs.get('setup_tasks', True):
             self.setup_tasks()
 
         self.blinkboard = BlinkBoardWidget()
@@ -124,22 +125,35 @@ class WebsocketTestingClient(object):
             # Signify that this socket is connecting
             self.sockets[identifier] = None
 
-            try:
-                # Await the connection to complete successfully
-                websocket = yield from websockets.connect(**connection_args)
-                websocket.connection_time = time.time() - start_time
-            except BaseException as e:
-                if isinstance(e, CertificateError):
-                    self.logger.log("[{}] SSL connection problem! {}".format(identifier, e))
-                else:
-                    self.logger.log("[{}] {}".format(identifier, e))
+            retries = 0
 
-                self.sockets[identifier] = False
+            while True:
+                try:
+                    # Await the connection to complete successfully
+                    websocket = yield from websockets.connect(**connection_args)
+                    websocket.connection_time = time.time() - start_time
+                    break
 
-                if isinstance(e, websockets.InvalidHandshake):
-                    self.sockets[identifier] = e
+                except BaseException as e:
+                    retries += 1
+                    if isinstance(e, CertificateError):
+                        # If there was an ssl error, bail immediately
+                        self.logger.log("[{}] SSL connection problem! {}".format(identifier, e))
+                        return False
+                    else:
+                        self.logger.log("[{}] {}".format(identifier, e))
+                        if retries > 3:
+                            self.sockets[identifier] = False
 
-                return False
+                            if isinstance(e, websockets.InvalidHandshake):
+                                self.sockets[identifier] = e
+
+                            return False
+
+
+                yield from asyncio.sleep(.25)
+
+
 
             # Create our handler object
             connected_websocket = ConnectedWebsocketConnection(websocket, identifier)
@@ -219,8 +233,6 @@ class WebsocketTestingClient(object):
 
         update_urwid_coro = self.update_urwid()
         tasks.append(asyncio.ensure_future(update_urwid_coro))
-
-        self.future = asyncio.gather(*tasks)
 
         # Gather all the tasks needed
         self.coros = tasks
