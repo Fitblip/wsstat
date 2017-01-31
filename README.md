@@ -39,6 +39,8 @@ When you pass the `--demo` flag to WSStat, it will spin up an asynchronous webso
 #### Installation
 Install from pip - `pip install wsstat`
 
+**Note:** if you have python 2 and 3 installed on the same system, you have to use `pip3 install wsstat`!
+
 The installation should be 100% straight forward and work fine. If that's not the case, please file a ticket!
 
 Please note: WSStat currently only works on Python >= 3.3, and won't install on python 2.7, which is a known limitation.
