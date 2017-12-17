@@ -13,7 +13,7 @@ import websockets
 import websockets.handshake
 
 from collections import OrderedDict, deque
-from websockets.protocol import OPEN
+from websockets.protocol import State
 from wsstat.gui import BlinkBoardWidget, LoggerWidget
 
 import logging
@@ -210,7 +210,7 @@ class WebsocketTestingClient(object):
             global_message_count = int(repr(self.global_message_counter)[6:-1])
             self.ring_buffer.append(global_message_count)
 
-            currently_connected_sockets = len([x for x in self.sockets.values() if x and not isinstance(x, BaseException) and x.ws.state == OPEN])
+            currently_connected_sockets = len([x for x in self.sockets.values() if x and not isinstance(x, BaseException) and x.ws.state == State.OPEN])
 
             self.logger.update_graph_data([self.messages_per_second,])
 
