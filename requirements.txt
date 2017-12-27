@@ -1,4 +1,4 @@
-websockets
+websockets==3.4
 urwid
 pytest
 asyncio
