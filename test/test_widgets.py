@@ -3,7 +3,7 @@ import os
 from unittest import mock
 
 import time
-from websockets.protocol import CONNECTING, OPEN, CLOSING, CLOSED
+from websockets.protocol import State
 from wsstat.gui import BlinkBoardWidget
 
 class TestBlinkBoardWidget(object):
@@ -15,7 +15,7 @@ class TestBlinkBoardWidget(object):
         self.connected_sockets = {}
         self.connected_sockets[self.generate_identifier()] = None
 
-        for state in [OPEN, CLOSING, CLOSED]:
+        for state in [State.OPEN, State.CLOSING, State.CLOSED]:
             socket = mock.Mock()
             socket.ws.state = state
             socket.last_message_recv = time.time()

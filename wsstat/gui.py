@@ -4,7 +4,7 @@ import time
 import urwid
 import urwid.curses_display
 
-from websockets.protocol import OPEN, CLOSING, CLOSED
+from websockets.protocol import State
 
 palette = [
     ('starting', 'white', ''),
@@ -121,13 +121,13 @@ class BlinkBoardWidget(object):
         if websocket is False or isinstance(websocket, BaseException):
             return 'error', error
 
-        elif websocket.ws.state == OPEN:
+        elif websocket.ws.state == State.OPEN:
             out = time.time() - websocket.last_message_recv
             if out < 0.3:
                 return 'connected_highlight', connected
             else:
                 return 'connected', connected
-        elif websocket.ws.state in (CLOSING, CLOSED):
+        elif websocket.ws.state in (State.CLOSING, State.CLOSED):
             return 'error', error
 
 class LoggerWidget(object):
