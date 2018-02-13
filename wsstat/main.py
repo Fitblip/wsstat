@@ -45,6 +45,13 @@ def parse_args():
         action="store_true"
     )
 
+    parser.add_argument(
+       '-i', "--insecure",
+        help="Don't validate SSL certificates on websocket servers",
+        dest="insecure",
+        action="store_true"
+    )
+
     args = parser.parse_args()
 
     if not args.websocket_url and not args.demo:
