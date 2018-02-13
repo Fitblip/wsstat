@@ -4,6 +4,7 @@ import hashlib
 import itertools
 import os
 import time
+import ssl
 import urllib
 import urllib.parse
 from ssl import CertificateError
@@ -84,6 +85,9 @@ class WebsocketTestingClient(object):
 
         if kwargs.get('setup_tasks', True):
             self.setup_tasks()
+
+        self.insecure_connection = kwargs.get('insecure', False)
+
 
         self.blinkboard = BlinkBoardWidget()
         self.logger = LoggerWidget()
@@ -292,10 +296,15 @@ class WebsocketTestingClient(object):
         pass
 
     def setup_websocket_connection(self, statedict):
-        return {
+        ws_args = {
             "uri": self.websocket_url.geturl(),
             "extra_headers": self.extra_headers
         }
+        
+        if self.insecure_connection:
+            ws_args['ssl'] = ssl._create_unverified_context()
+        
+        return ws_args
 
     def get_identifier(self, statedict):
         return next(self.socket_count)
