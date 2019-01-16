@@ -7,7 +7,7 @@ import websockets
 import sys
 
 if sys.version_info < (3, 4, 4):
-    asyncio.ensure_future = asyncio.async
+    asyncio.ensure_future = getattr(asyncio, 'async')
 
 @asyncio.coroutine
 def echo_time(websocket, path):
