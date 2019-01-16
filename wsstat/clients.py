@@ -21,7 +21,7 @@ import logging
 import sys
 
 if sys.version_info < (3, 4, 4):
-    asyncio.ensure_future = asyncio.async
+    asyncio.ensure_future = getattr(asyncio, 'async')
 
 class ConnectedWebsocketConnection(object):
     def __init__(self, ws, identifier):
