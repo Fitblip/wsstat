@@ -72,3 +72,11 @@ optional arguments:
   --demo                Start a demo websocket server and point wsstat at it
   -i, --insecure        Don't validate SSL certificates on websocket servers
 ```
+
+#### Usage example
+
+Connect a total of 30 clients by attempting to open five simultaneous sockets at `wss://echo.websocket.org`
+
+```
+$ wsstat wss://echo.websocket.org -n 30 -c 5
+```
