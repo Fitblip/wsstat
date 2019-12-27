@@ -81,7 +81,7 @@ class WebsocketTestingClient(object):
         self.ring_buffer = deque(maxlen=10)
 
         if kwargs.get('header'):
-            self.extra_headers = dict([map(lambda x: x.strip(), kwargs['header'].split(':'))])
+            self.extra_headers = dict([map(lambda x: x.strip(), kwargs['header'].split(':', 1))])
 
         if kwargs.get('setup_tasks', True):
             self.setup_tasks()
