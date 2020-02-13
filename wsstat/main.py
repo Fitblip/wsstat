@@ -54,7 +54,7 @@ def parse_args():
 
     parser.add_argument(
        '-m', "--init-message",
-        help="Initial message that a client will send to the websocket server",
+        help="Initial message that a client will send to the websocket server after connection",
         dest="init_message",
         action="store",
         default=None,
