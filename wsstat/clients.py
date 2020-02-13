@@ -68,6 +68,7 @@ class WebsocketTestingClient(object):
         self.total_connections = kwargs.get('total_connections', 250)
         self._exiting = False
         self.extra_headers = None
+        self.init_message = kwargs.get('init_message')
 
         # Asyncio stuff
         self.loop = asyncio.get_event_loop()
@@ -140,6 +141,9 @@ class WebsocketTestingClient(object):
                     # Await the connection to complete successfully
                     websocket = yield from websockets.connect(**connection_args)
                     websocket.connection_time = time.time() - start_time
+
+                    if self.init_message:
+                        yield from websocket.send(self.init_message)
                     break
 
                 except BaseException as e:
