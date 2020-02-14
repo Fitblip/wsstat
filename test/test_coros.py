@@ -91,7 +91,7 @@ class TestCoros(object):
             all_messages = self.arg_list_to_string(self.client.logger.log.call_args_list)
             assert "Connecting" in all_messages
             assert "Connected" in all_messages
-            assert "connection is closed" in all_messages
+            assert "Peace out homie!" in all_messages
             assert self.identifier in all_messages
 
             connected_websocket = self.client.sockets[self.identifier]
