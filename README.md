@@ -54,7 +54,7 @@ Other than that, you can adjust the total number of connected clients with `-n`,
 ```
 $ wsstat -h
 usage: wsstat [-h] [-n TOTAL_CONNECTIONS] [-c MAX_CONNECTING_SOCKETS]
-              [-H HEADER] [--demo] [-i]
+              [-H HEADER] [--demo] [-i] [-m INIT_MESSAGE]
               [websocket_url]
 
 positional arguments:
@@ -71,4 +71,7 @@ optional arguments:
                         Pass a custom header with each websocket connection
   --demo                Start a demo websocket server and point wsstat at it
   -i, --insecure        Don't validate SSL certificates on websocket servers
+  -m INIT_MESSAGE, --init-message INIT_MESSAGE
+                        Initial message that a client will send to the
+                        websocket server after connection
 ```
