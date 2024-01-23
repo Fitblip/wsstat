@@ -11,7 +11,10 @@ from ssl import CertificateError
 
 import urwid
 import websockets
-import websockets.handshake
+try:
+    import websockets.handshake
+except ImportError:
+    import websockets.legacy.handshake
 
 from collections import OrderedDict, deque
 from websockets.protocol import State
